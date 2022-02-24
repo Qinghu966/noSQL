@@ -8,7 +8,14 @@ router.get('/', async (request, response) => {
     response.status(200).json(countries);
 });
 
+router.get('/names', async (request, response) => {
+    const { word } = request.body;
+    const result = await CountryModel.find({name : { '$regex' : word, '$options' : 'i' }});
+    response.status(200).json(result);
+});
+
 router.get('/:id', async (request, response) => {
+    try{
     const countryId = request.params.id;
 
     const countries = await CountryModel.findOne({
@@ -16,17 +23,24 @@ router.get('/:id', async (request, response) => {
     });
     
     response.status(200).json(countries);
+    }
+    catch{
+        response.status(500).json("Country not found");
+    }
 });
 
 router.post('/', async (request, response) => {
-    const {name, isoCode} = request.body
-
-    const country = await CountryModel.create({
-        name: name,
-        isoCode
-    });
-
-    response.status(200).json(country);
+    try{
+        const {name, isoCode} = request.body
+        const country = await CountryModel.create({
+            name: name,
+            isoCode: isoCode
+        });
+        response.status(200).json(country);
+    }
+    catch{
+        response.status(500).json('Country not created');
+    }
 });
 
 router.delete('/:id', async (request, response) => {
